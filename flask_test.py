@@ -2,12 +2,10 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.metrics import categorical_accuracy, top_k_categorical_accuracy
 from tensorflow.keras.applications.mobilenet import preprocess_input
 from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
-# from skimage import io
+from skimage import io
 import matplotlib.pyplot as plt
-# import pandas as pd
 import numpy as np
 # import tensorflow as tf
-import json
 import cv2
 import os
 
@@ -92,7 +90,7 @@ app = Flask(__name__)
 load_path = 'skin_model.h5'
 # global model
 model = load_model(load_path, custom_objects={"top_2_accuracy": top_2_accuracy, "top_3_accuracy": top_3_accuracy})
-url_local = "test_image.jpg"
+r = "test_image.jpg"
 
 @app.route('/')
 def home():
@@ -114,11 +112,13 @@ def respond():
     # Valid url
     else:
         try:
-            img_obj0 = cv2.imread(name, cv2.COLOR_BGR2RGB)
-            # predictions = predict_one(img_obj0, model)
-            response["MESSAGE"] = f"Url {name} is valid!!"
-        except:
-            response["MESSAGE"] = f"Url {name} is invalid"
+            image_np = io.imread(name)
+            img_inp = png2rgb(image_np)
+            predictions = predict_one(img_inp, model)[0]
+            response["MESSAGE"] = f"Url {name} is valid!! Predicted: {predictions}"
+        except Exception as ex:
+            response["MESSAGE"] = f"Url {name}, {type(name)} is invalid"
+            print(ex)
 
     # Return the response in json format
     return jsonify(response)
@@ -135,8 +135,22 @@ def respond():
 #
 #     # predict
 #     predictions = predict_one(img_obj, model)
+#
+#     pass
 
-
+# @app.route('/test/', methods=['GET', 'POST'])
+# def test_predict(): ################## pseudo-code
+    # data = request.json()
+    # return jsonify(data)
+    # img_url = 'test_image.jpg'
+    #
+    # # get image and convert
+    # img_obj = cv2.imread(img_url, cv2.COLOR_BGR2RGB) # random
+    #
+    # # predict
+    # predictions = predict_one(img_obj, model)
+    #
+    # return predictions
 
 if __name__ == '__main__':
     # print('Main')
