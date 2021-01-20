@@ -110,7 +110,7 @@ def predict(): ################## pseudo-code
     # predict
     predictions = predict_one(img_obj, model)
 
-    pass
+    return predictions
 
 if __name__ == '__main__':
     print('Main')
