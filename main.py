@@ -2,20 +2,31 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.metrics import categorical_accuracy, top_k_categorical_accuracy
 from tensorflow.keras.applications.mobilenet import preprocess_input
 from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
+from skimage import io
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import json
 import cv2
 
 app = Flask(__name__)
+load_path = 'skin_model.h5'
+global model
+model = load_model(load_path, custom_objects={"top_2_accuracy": top_2_accuracy, "top_3_accuracy": top_3_accuracy})
+r = "test_image.jpg"
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/predict/',methods=['POST'])
-def predict_one(img, model, print_all=False, plot_img=False):
+def predict():
+    # data = request.get_json() ###################################
+    # print(data) ################################################
+    pass
+
+def predict_one(img, model=model, print_all=False, plot_img=False):
     resized = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
     preprocessed = preprocess_input(resized)
     input_img = preprocessed.reshape(1, 224, 224, 3)
@@ -54,7 +65,7 @@ def predict_one(img, model, print_all=False, plot_img=False):
         plt.title('Mole')
         plt.show()
 
-    return (pred_name_class, pred_class, pred_R)
+    return jsonify((pred_name_class, pred_class, pred_R))
 
 # returns a compiled model
 def top_3_accuracy(y_true, y_pred):
@@ -63,10 +74,32 @@ def top_3_accuracy(y_true, y_pred):
 def top_2_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=2)
 
+def url2rgb(url, background=(255,255,255) ):
+    """Image converting in case if we get a link"""
+    image_np = io.imread(url)
+    row, col, ch = image_np.shape
+
+    if ch == 3:
+        return rgba
+
+    assert ch == 4, 'RGBA image has 4 channels.'
+
+    rgb = np.zeros( (row, col, 3), dtype='float32' )
+    r, g, b, a = rgba[:,:,0], rgba[:,:,1], rgba[:,:,2], rgba[:,:,3]
+
+    a = np.asarray( a, dtype='float32' ) / 255.0
+
+    R, G, B = background
+
+    rgb[:,:,0] = r * a + (1.0 - a) * R
+    rgb[:,:,1] = g * a + (1.0 - a) * G
+    rgb[:,:,2] = b * a + (1.0 - a) * B
+
+    return np.asarray(rgb, dtype='uint8')
+
 if __name__ == '__main__':
     print('Main')
-    load_path = 'skin_model.h5'
-    model = load_model(load_path, custom_objects={"top_2_accuracy": top_2_accuracy, "top_3_accuracy": top_3_accuracy})
     print('Model is loaded', type(model))
+    app.run(debug=True, host='0.0.0.0')
 
 
