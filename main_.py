@@ -4,7 +4,7 @@ from tensorflow.keras.applications.mobilenet import preprocess_input
 from flask import Flask, request, redirect, url_for, flash, jsonify, render_template
 from skimage import io
 import matplotlib.pyplot as plt
-import pandas as pd
+# import pandas as pd
 import numpy as np
 # import tensorflow as tf
 import json
@@ -94,10 +94,15 @@ def home():
 
 @app.route('/predict/',methods=['POST'])
 def predict(): ################## pseudo-code
-    data = request.get_json() ###################################
-    print(data) ################################################
+    # get image URL
+    data = request.get_json() ################################### some string 'imgurl=http://...file.jpg'
+    print(data) ################################################ for debugging
     img_url = json.load(data)['imgurl']
+    
+    # get image and convert
     img_obj = url2rgb(img_url)
+
+    # predict
     predictions = predict_one(img_obj, model)
 
     pass
