@@ -55,9 +55,14 @@ def predict_one(img, model=model, print_all=False, plot_img=False):
         6: 'vasc'  # vascular lesions (angiomas, angiokeratomas, pyogenic granulomas and hemorrhages, vasc)
     }
     pred_class = model.predict(input_img)
-    pred_prob = (pred_class).argsort().ravel()[::-1]
+    # pred_prob = (pred_class).argsort().ravel()[::-1]
     pred_name_class = class_names[pred_class.argmax()].upper()
     pred_R = 100 - (100 * pred_class[:, 5][0])
+
+    # create dictionary
+    res = dict()
+    for i, pr in enumerate(pred_class[0]):
+        res.update({class_names[i].upper(): f'{100 * pr:.8f}%'})
 
     # print in red if the risk of melanoma is high
     if pred_R > 5:
@@ -79,7 +84,7 @@ def predict_one(img, model=model, print_all=False, plot_img=False):
         plt.title('Mole')
         plt.show()
 
-    return (pred_name_class, pred_class, pred_R)
+    return (pred_name_class, pred_R, res)
 
 
 app = Flask(__name__)
@@ -98,7 +103,7 @@ def predict(): ################## pseudo-code
     data = request.get_json() ################################### some string 'imgurl=http://...file.jpg'
     print(data) ################################################ for debugging
     img_url = json.load(data)['imgurl']
-    
+
     # get image and convert
     img_obj = url2rgb(img_url)
 
