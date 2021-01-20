@@ -10,6 +10,7 @@ import numpy as np
 import json
 import cv2
 
+
 app = Flask(__name__)
 load_path = 'skin_model.h5'
 global model
@@ -20,6 +21,7 @@ r = "test_image.jpg"
 def home():
     return render_template('index.html')
 
+<<<<<<< HEAD
 @app.route('/predict/',methods=['POST'])
 def predict():
     # data = request.get_json() ###################################
@@ -34,14 +36,14 @@ def predict_one(img, model=model, print_all=False, plot_img=False):
     class_names = {
         0: 'akiec',  # actinic keratoses and intraepithelial carcinoma/Bowen disease (akiec)
         1: 'bcc',  # basal cell carcinoma (bcc) *
-        2: 'bkl', # benign lesions of the keratosis type
+        2: 'bkl',  # benign lesions of the keratosis type
         3: 'df',  # dermatofibroma (df)
         4: 'mel',  # melanoma (mel) *
         5: 'nv',  # melanocytic nevi (nv)
         6: 'vasc'  # vascular lesions (angiomas, angiokeratomas, pyogenic granulomas and hemorrhages, vasc)
     }
     pred_class = model.predict(input_img)
-    pred_prob = (pred_class).argsort().ravel()[::-1]
+    # pred_prob = (pred_class).argsort().ravel()[::-1]
     pred_name_class = class_names[pred_class.argmax()].upper()
     pred_R = 100 - (100 * pred_class[:, 5][0])
 
@@ -67,12 +69,15 @@ def predict_one(img, model=model, print_all=False, plot_img=False):
 
     return jsonify((pred_name_class, pred_class, pred_R))
 
+
 # returns a compiled model
 def top_3_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=3)
 
+
 def top_2_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=2)
+
 
 def url2rgb(url, background=(255,255,255) ):
     """Image converting in case if we get a link"""
@@ -97,9 +102,10 @@ def url2rgb(url, background=(255,255,255) ):
 
     return np.asarray(rgb, dtype='uint8')
 
+
 if __name__ == '__main__':
     print('Main')
     print('Model is loaded', type(model))
-    app.run(debug=True, host='0.0.0.0')
 
+    app.run(debug=True, host='0.0.0.0')
 
