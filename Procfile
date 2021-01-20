@@ -1,1 +1,1 @@
-web: gunicorn inf_file:app
+web: gunicorn main_:app

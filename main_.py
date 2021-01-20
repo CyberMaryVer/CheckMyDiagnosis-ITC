@@ -110,7 +110,7 @@ def predict(): ################## pseudo-code
     # predict
     predictions = predict_one(img_obj, model)
 
-    pass
+    return predictions
 
 app.route('/test/',methods=['POST'])
 def test_predict(): ################## pseudo-code
