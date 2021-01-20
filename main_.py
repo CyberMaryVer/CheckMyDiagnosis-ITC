@@ -23,12 +23,12 @@ def url2rgb(url, background=(255,255,255) ):
     row, col, ch = image_np.shape
 
     if ch == 3:
-        return rgba
+        return url
 
     assert ch == 4, 'RGBA image has 4 channels.'
 
     rgb = np.zeros( (row, col, 3), dtype='float32' )
-    r, g, b, a = rgba[:,:,0], rgba[:,:,1], rgba[:,:,2], rgba[:,:,3]
+    r, g, b, a = url[:,:,0], url[:,:,1], url[:,:,2], url[:,:,3]
 
     a = np.asarray( a, dtype='float32' ) / 255.0
 
@@ -40,7 +40,7 @@ def url2rgb(url, background=(255,255,255) ):
 
     return np.asarray(rgb, dtype='uint8')
 
-def predict_one(img, model=model, print_all=False, plot_img=False):
+def predict_one(img, model, print_all=False, plot_img=False):
     resized = cv2.resize(img, (224, 224), interpolation=cv2.INTER_AREA)
     preprocessed = preprocess_input(resized)
     input_img = preprocessed.reshape(1, 224, 224, 3)
@@ -89,7 +89,7 @@ def predict_one(img, model=model, print_all=False, plot_img=False):
 
 app = Flask(__name__)
 load_path = 'skin_model.h5'
-global model
+# global model
 model = load_model(load_path, custom_objects={"top_2_accuracy": top_2_accuracy, "top_3_accuracy": top_3_accuracy})
 r = "test_image.jpg"
 
@@ -112,9 +112,35 @@ def predict(): ################## pseudo-code
 
     pass
 
+app.route('/test/',methods=['POST'])
+def test_predict(): ################## pseudo-code
+    # get image URL
+    # data = request.get_json() ################################### some string 'imgurl=http://...file.jpg'
+    # print(data) ################################################ for debugging
+    # img_url = json.load(data)['imgurl']
+    img_url = 'test_image.jpg'
+
+    # get image and convert
+    img_obj = url2rgb(img_url)
+
+    # predict
+    predictions = predict_one(img_obj, model)
+
+    pass
+
 if __name__ == '__main__':
     print('Main')
     print('Model is loaded', type(model))
-    app.run(host='0.0.0.0')
+    # app.run(debug=True, host='0.0.0.0')
+    img_url = 'test_image.jpg'
+
+    # get image and convert
+    # img_obj = url2rgb(img_url)
+
+    img_obj = cv2.imread(img_url, cv2.COLOR_BGR2RGB) # random
+    # predict
+    predictions = predict_one(img_obj, model)
+    for pred in predictions:
+        print(pred)
 
 
